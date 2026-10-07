@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard 1er Parcial - Desarrollo de Software</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', system-ui, sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
@@ -53,32 +49,23 @@
             </div>
         </section>
 
-        <!-- Charts & Controls -->
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md">
-                <h2 class="text-lg font-semibold mb-4 text-slate-200">Distribución de Calificaciones</h2>
-                <canvas id="distChart"></canvas>
+        <!-- Controls -->
+        <section class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md">
+            <h2 class="text-lg font-semibold mb-4 text-slate-200">Controles y Búsqueda</h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="text" id="searchInput" placeholder="🔍 Buscar alumno por nombre..." class="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="sortSelect" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="name-asc">Nombre (A-Z)</option>
+                    <option value="name-desc">Nombre (Z-A)</option>
+                    <option value="avg-desc">Promedio (Mayor a Menor)</option>
+                    <option value="avg-asc">Promedio (Menor a Mayor)</option>
+                    <option value="abs-desc">Faltas (Mayor a Menor)</option>
+                </select>
             </div>
-            <div class="lg:col-span-2 bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md flex flex-col">
-                <h2 class="text-lg font-semibold mb-4 text-slate-200">Controles y Búsqueda</h2>
-                <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                    <input type="text" id="searchInput" placeholder="🔍 Buscar alumno por nombre..." class="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <select id="sortSelect" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="name-asc">Nombre (A-Z)</option>
-                        <option value="name-desc">Nombre (Z-A)</option>
-                        <option value="avg-desc">Promedio (Mayor a Menor)</option>
-                        <option value="avg-asc">Promedio (Menor a Mayor)</option>
-                        <option value="abs-desc">Faltas (Mayor a Menor)</option>
-                    </select>
-                </div>
-                <div class="flex-1 overflow-auto scrollbar-hide">
-                    <p class="text-slate-400 text-sm">💡 <strong>Tip:</strong> Haz clic en cualquier fila de la tabla para ver el gráfico radar de sus actividades.</p>
-                    <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span> Excelente (≥65)</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span> Regular (60-64)</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span> Reprobado (<60)</div>
-                    </div>
-                </div>
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-slate-400">
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span> Excelente (≥65)</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span> Regular (60-64)</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span> Reprobado (<60)</div>
             </div>
         </section>
 
@@ -92,7 +79,6 @@
                             <th class="px-6 py-3 text-center">Promedio</th>
                             <th class="px-6 py-3 text-center">Faltas</th>
                             <th class="px-6 py-3 text-center">Estado</th>
-                            <th class="px-6 py-3 text-center">Detalle</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-700">
@@ -103,91 +89,49 @@
         </section>
     </main>
 
-    <!-- Modal for Student Details -->
-    <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-600 w-full max-w-2xl fade-in overflow-hidden">
-            <div class="p-6 border-b border-slate-700 flex justify-between items-center">
-                <div>
-                    <h3 id="modalName" class="text-xl font-bold text-white">Nombre del Alumno</h3>
-                    <p id="modalSub" class="text-slate-400 text-sm">Detalle de Actividades</p>
-                </div>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                    <div class="h-64 md:h-80">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                    <div class="space-y-3">
-                        <h4 class="font-semibold text-slate-200 mb-2">Resumen Rápido</h4>
-                        <div class="flex justify-between bg-slate-700/50 p-3 rounded-lg">
-                            <span class="text-slate-400">Promedio Final:</span>
-                            <span id="modalAvg" class="font-bold text-lg"></span>
-                        </div>
-                        <div class="flex justify-between bg-slate-700/50 p-3 rounded-lg">
-                            <span class="text-slate-400">Faltas:</span>
-                            <span id="modalAbs" class="font-bold text-lg text-red-400"></span>
-                        </div>
-                        <div class="flex justify-between bg-slate-700/50 p-3 rounded-lg">
-                            <span class="text-slate-400">Actividades con 0:</span>
-                            <span id="modalZeros" class="font-bold text-lg text-orange-400"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         // --- DATA ---
-        const activities = [
-            "Investigación HTML", "Presentación HTML", "Línea de Tiempo", 
-            "Infografía VS Code", "Reporte VS Code", "Ejemplos HTML", 
-            "Etiquetas HTML", "Atributos HTML", "Código Pantalla", 
-            "Cambia Código", "Proyecto Web"
-        ];
-
         const students = [
-            { name: "ALVAREZ OLIVARRA ARIATHNA BETZABE", scores: [100,100,100,100,100,100,100,0,100,100,80], avg: 62, abs: 0 },
-            { name: "AMARILLAS ALMADA ALFREDO", scores: [100,100,100,100,100,100,100,100,100,100,90], avg: 69, abs: 0 },
-            { name: "ARGÜELLES APODACA EMILY YORLEI", scores: [0,100,100,100,100,90,100,100,100,100,80], avg: 62, abs: 0 },
-            { name: "ARZOLA SOTO EDUARDO ALBERTO", scores: [100,90,100,100,100,100,100,100,100,100,90], avg: 69, abs: 0 },
-            { name: "BENITEZ MEDINA ISMAEL", scores: [100,100,100,100,100,100,100,100,100,100,80], avg: 69, abs: 1 },
-            { name: "CORRAL CASTILLO KENNETH ALEXANDER", scores: [100,100,100,100,100,100,100,100,100,100,90], avg: 69, abs: 0 },
-            { name: "COTA NUÑEZ KEVIN", scores: [100,90,100,100,100,100,100,100,100,100,90], avg: 69, abs: 0 },
-            { name: "CUEVAS MARTINEZ MIGUEL ANTONIO", scores: [100,80,100,100,100,100,100,90,100,100,80], avg: 67, abs: 0 },
-            { name: "DOMINGUEZ FELIX MAURO DAMIAN", scores: [100,0,100,100,100,100,0,0,0,100,80], avg: 43, abs: 3 },
-            { name: "DOMINGUEZ LEYVA JUAN EDUARDO", scores: [100,100,100,100,100,100,100,100,100,100,80], avg: 69, abs: 0 },
-            { name: "DUARTE RIOS LUIS FRANCISCO", scores: [100,100,100,100,100,100,100,100,100,100,80], avg: 69, abs: 2 },
-            { name: "ELIOPULOS MONTAÑO JORGE EMILIANO", scores: [100,100,100,100,100,100,100,100,100,100,90], avg: 69, abs: 0 },
-            { name: "ESQUER VALENZUELA BRAYAN JESUS", scores: [100,85,100,100,100,100,100,100,100,100,90], avg: 68, abs: 0 },
-            { name: "GARATUZA HERNANDEZ EMILIANO", scores: [100,80,100,100,100,100,100,100,100,100,90], avg: 68, abs: 0 },
-            { name: "GARCIA CAMACHO MIGUEL ARMANDO", scores: [100,90,100,100,100,100,100,90,100,100,80], avg: 67, abs: 0 },
-            { name: "GARCIA ROJAS DANIELA", scores: [100,80,100,100,100,100,100,100,100,100,90], avg: 68, abs: 0 },
-            { name: "GASTELUM FRANCO DIEGO ALEJANDRO", scores: [100,0,100,100,100,100,100,0,100,100,80], avg: 56, abs: 2 },
-            { name: "GUTIÉRREZ CORONA JUAN LUIS", scores: [0,80,0,100,100,100,100,100,100,100,80], avg: 55, abs: 1 },
-            { name: "HERNANDEZ OLEA EMILIANO", scores: [0,95,100,100,100,100,100,90,100,100,80], avg: 61, abs: 1 },
-            { name: "HERRERA MORENO KRISTHIAN ABDIEL", scores: [90,80,100,100,100,90,100,90,100,100,100], avg: 67, abs: 1 },
-            { name: "JIMENEZ CAMPOA JUAN CARLOS", scores: [100,100,100,100,100,100,100,100,100,100,80], avg: 69, abs: 1 },
-            { name: "LARA LEYVA JOAN ERNESTO", scores: [100,100,100,90,100,100,100,100,100,100,90], avg: 69, abs: 0 },
-            { name: "MACHADO BELTRAN LILIA PAULINA", scores: [100,100,100,100,100,90,100,90,100,100,70], avg: 67, abs: 0 },
-            { name: "MEDRANO QUINTERO MARIA CRISTINA", scores: [0,80,100,100,100,0,100,90,100,100,80], avg: 54, abs: 1 },
-            { name: "MENESES MONTIJO ANYYA YARETHZI", scores: [100,100,100,100,100,100,100,100,100,100,80], avg: 69, abs: 1 },
-            { name: "MORENO VILLANUEVA FRANCISCO YAHIR", scores: [100,100,100,100,100,100,100,100,100,100,80], avg: 69, abs: 0 },
-            { name: "NUÑEZ BERNAL JUAN MANUEL", scores: [100,100,100,100,100,100,100,90,100,100,80], avg: 68, abs: 1 },
-            { name: "OCHOA GALVEZ DANIELL ALELY", scores: [100,100,100,100,100,100,100,100,100,100,90], avg: 69, abs: 0 },
-            { name: "OLIVA MARTINEZ AYLIN ALEXIA", scores: [100,80,100,100,100,100,100,100,100,100,80], avg: 67, abs: 2 },
-            { name: "PERAL JIMENEZ VALERIA GUADALUPE", scores: [100,70,100,100,0,100,100,0,100,100,80], avg: 54, abs: 0 },
-            { name: "PERAZA MARTINEZ REGINA VALERIA", scores: [100,100,100,100,100,90,100,100,100,100,90], avg: 69, abs: 0 },
-            { name: "QUESNEY ESPINOZA LESLIE", scores: [100,100,100,100,0,0,100,100,100,100,70], avg: 55, abs: 4 },
-            { name: "RABAGO SALINAS JESUS ROBERTO", scores: [0,0,100,100,100,100,100,90,100,100,80], avg: 55, abs: 1 },
-            { name: "RAMIREZ VAZQUEZ LUIS RUBEN", scores: [100,100,100,100,100,100,100,100,100,100,90], avg: 69, abs: 1 },
-            { name: "RIOS CAMPOS ORLANDO ADRIEL", scores: [100,100,100,100,100,90,100,100,100,100,70], avg: 67, abs: 1 },
-            { name: "SALAZAR CASTRO ANEL MICHELL", scores: [100,100,100,100,100,100,100,100,0,100,80], avg: 62, abs: 5 },
-            { name: "SAUCEDA BERNAL ANGEL URIEL", scores: [100,100,100,100,100,90,100,90,100,100,80], avg: 67, abs: 2 },
-            { name: "VALDEZ LUJAN DIANA MARIA", scores: [100,80,100,100,100,100,100,100,100,100,100], avg: 69, abs: 1 },
-            { name: "VALENZUELA DE LA VEGA JORGE ADRIAN", scores: [100,0,0,0,0,100,100,90,100,100,80], avg: 43, abs: 0 },
-            { name: "ZEPEDA ALVAREZ CARLOS ISAAC", scores: [100,80,0,90,100,50,100,0,0,100,90], avg: 45, abs: 2 }
+            { name: "ALVAREZ OLIVARRA ARIATHNA BETZABE", avg: 62, abs: 0 },
+            { name: "AMARILLAS ALMADA ALFREDO", avg: 69, abs: 0 },
+            { name: "ARGÜELLES APODACA EMILY YORLEI", avg: 62, abs: 0 },
+            { name: "ARZOLA SOTO EDUARDO ALBERTO", avg: 69, abs: 0 },
+            { name: "BENITEZ MEDINA ISMAEL", avg: 69, abs: 1 },
+            { name: "CORRAL CASTILLO KENNETH ALEXANDER", avg: 69, abs: 0 },
+            { name: "COTA NUÑEZ KEVIN", avg: 69, abs: 0 },
+            { name: "CUEVAS MARTINEZ MIGUEL ANTONIO", avg: 67, abs: 0 },
+            { name: "DOMINGUEZ FELIX MAURO DAMIAN", avg: 43, abs: 3 },
+            { name: "DOMINGUEZ LEYVA JUAN EDUARDO", avg: 69, abs: 0 },
+            { name: "DUARTE RIOS LUIS FRANCISCO", avg: 69, abs: 2 },
+            { name: "ELIOPULOS MONTAÑO JORGE EMILIANO", avg: 69, abs: 0 },
+            { name: "ESQUER VALENZUELA BRAYAN JESUS", avg: 68, abs: 0 },
+            { name: "GARATUZA HERNANDEZ EMILIANO", avg: 68, abs: 0 },
+            { name: "GARCIA CAMACHO MIGUEL ARMANDO", avg: 67, abs: 0 },
+            { name: "GARCIA ROJAS DANIELA", avg: 68, abs: 0 },
+            { name: "GASTELUM FRANCO DIEGO ALEJANDRO", avg: 56, abs: 2 },
+            { name: "GUTIÉRREZ CORONA JUAN LUIS", avg: 55, abs: 1 },
+            { name: "HERNANDEZ OLEA EMILIANO", avg: 61, abs: 1 },
+            { name: "HERRERA MORENO KRISTHIAN ABDIEL", avg: 67, abs: 1 },
+            { name: "JIMENEZ CAMPOA JUAN CARLOS", avg: 69, abs: 1 },
+            { name: "LARA LEYVA JOAN ERNESTO", avg: 69, abs: 0 },
+            { name: "MACHADO BELTRAN LILIA PAULINA", avg: 67, abs: 0 },
+            { name: "MEDRANO QUINTERO MARIA CRISTINA", avg: 54, abs: 1 },
+            { name: "MENESES MONTIJO ANYYA YARETHZI", avg: 69, abs: 1 },
+            { name: "MORENO VILLANUEVA FRANCISCO YAHIR", avg: 69, abs: 0 },
+            { name: "NUÑEZ BERNAL JUAN MANUEL", avg: 68, abs: 1 },
+            { name: "OCHOA GALVEZ DANIELL ALELY", avg: 69, abs: 0 },
+            { name: "OLIVA MARTINEZ AYLIN ALEXIA", avg: 67, abs: 2 },
+            { name: "PERAL JIMENEZ VALERIA GUADALUPE", avg: 54, abs: 0 },
+            { name: "PERAZA MARTINEZ REGINA VALERIA", avg: 69, abs: 0 },
+            { name: "QUESNEY ESPINOZA LESLIE", avg: 55, abs: 4 },
+            { name: "RABAGO SALINAS JESUS ROBERTO", avg: 55, abs: 1 },
+            { name: "RAMIREZ VAZQUEZ LUIS RUBEN", avg: 69, abs: 1 },
+            { name: "RIOS CAMPOS ORLANDO ADRIEL", avg: 67, abs: 1 },
+            { name: "SALAZAR CASTRO ANEL MICHELL", avg: 62, abs: 5 },
+            { name: "SAUCEDA BERNAL ANGEL URIEL", avg: 67, abs: 2 },
+            { name: "VALDEZ LUJAN DIANA MARIA", avg: 69, abs: 1 },
+            { name: "VALENZUELA DE LA VEGA JORGE ADRIAN", avg: 43, abs: 0 },
+            { name: "ZEPEDA ALVAREZ CARLOS ISAAC", avg: 45, abs: 2 }
         ];
 
         // --- STATS CALCULATION ---
@@ -203,40 +147,6 @@
         document.getElementById('statMax').innerText = maxAvg;
         document.getElementById('statAbs').innerText = totalAbs;
 
-        // --- CHARTS ---
-        // Distribution Chart
-        const distCtx = document.getElementById('distChart').getContext('2d');
-        const ranges = { '0-49': 0, '50-59': 0, '60-64': 0, '65-69': 0, '70': 0 };
-        students.forEach(s => {
-            if (s.avg < 50) ranges['0-49']++;
-            else if (s.avg < 60) ranges['50-59']++;
-            else if (s.avg < 65) ranges['60-64']++;
-            else if (s.avg < 70) ranges['65-69']++;
-            else ranges['70']++;
-        });
-
-        new Chart(distCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(ranges),
-                datasets: [{
-                    label: 'Número de Alumnos',
-                    data: Object.values(ranges),
-                    backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#10b981'],
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { color: '#94a3b8', stepSize: 2 }, grid: { color: '#334155' } },
-                    x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
-                }
-            }
-        });
-
         // --- TABLE RENDERING ---
         const tableBody = document.getElementById('tableBody');
         const searchInput = document.getElementById('searchInput');
@@ -250,11 +160,10 @@
 
         function renderTable(data) {
             tableBody.innerHTML = '';
-            data.forEach((s, index) => {
+            data.forEach((s) => {
                 const status = getStatus(s.avg);
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-slate-700/50 cursor-pointer transition-colors';
-                row.onclick = () => openModal(s);
+                row.className = 'hover:bg-slate-700/50 transition-colors';
                 
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-white whitespace-nowrap">${s.name}</td>
@@ -264,9 +173,6 @@
                     </td>
                     <td class="px-6 py-4 text-center">
                         <span class="px-2 py-1 rounded-full text-xs border ${status.color}">${status.text}</span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <button class="text-blue-400 hover:text-blue-300 font-semibold">Ver 📈</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -298,68 +204,6 @@
         
         // Initial render
         filterAndSort();
-
-        // --- MODAL & RADAR CHART ---
-        const modal = document.getElementById('modal');
-        let radarChartInstance = null;
-
-        function openModal(student) {
-            document.getElementById('modalName').innerText = student.name;
-            document.getElementById('modalSub').innerText = `Análisis de ${activities.length} Actividades`;
-            document.getElementById('modalAvg').innerText = student.avg;
-            document.getElementById('modalAbs').innerText = student.abs;
-            document.getElementById('modalZeros').innerText = student.scores.filter(s => s === 0).length;
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-
-            const ctx = document.getElementById('radarChart').getContext('2d');
-            if (radarChartInstance) radarChartInstance.destroy();
-
-            radarChartInstance = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: activities,
-                    datasets: [{
-                        label: 'Calificación',
-                        data: student.scores,
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderColor: 'rgb(59, 130, 246)',
-                        pointBackgroundColor: student.scores.map(s => s === 0 ? '#ef4444' : (s < 80 ? '#eab308' : '#22c55e')),
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgb(59, 130, 246)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: '#475569' },
-                            grid: { color: '#475569' },
-                            pointLabels: { color: '#cbd5e1', font: { size: 10 } },
-                            ticks: { display: false, stepSize: 20 },
-                            suggestedMin: 0,
-                            suggestedMax: 100
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-
-        function closeModal() {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        // Close modal on outside click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
     </script>
 </body>
 </html>
