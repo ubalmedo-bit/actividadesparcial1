@@ -1,178 +1,343 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard 1er Parcial - Desarrollo de Software</title>
+    <title>Dashboard Completo - 1er Parcial Desarrollo de Software</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', system-ui, sans-serif; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .table-container { max-height: 75vh; overflow: auto; }
+        .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #1e293b; }
+        .table-container::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .sticky-col { position: sticky; left: 0; z-index: 10; }
+        .sticky-col-2 { position: sticky; left: 50px; z-index: 10; }
+        th.sticky-col, th.sticky-col-2 { z-index: 20; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .cell-zero { background: rgba(239, 68, 68, 0.2); color: #f87171; font-weight: 600; }
+        .cell-low { background: rgba(234, 179, 8, 0.12); color: #facc15; }
+        .cell-perfect { color: #34d399; font-weight: 600; }
+        .row-hover:hover td { background: rgba(59, 130, 246, 0.08) !important; }
+        .pass-badge { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+        .fail-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
     <!-- Header -->
-    <header class="bg-slate-800 border-b border-slate-700 p-6 shadow-lg">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+    <header class="bg-slate-800 border-b border-slate-700 p-5 shadow-lg">
+        <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-blue-400">📊 Dashboard de Calificaciones</h1>
-                <p class="text-slate-400 text-sm md:text-base">Desarrollo de Software con Herramientas | 1er Parcial</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-blue-400">📊 Dashboard Completo - 1er Parcial</h1>
+                <p class="text-slate-400 text-sm">Desarrolla Software con Herramientas | Calificación aprobatoria: <span class="text-green-400 font-semibold">60</span></p>
             </div>
-            <div class="flex items-center gap-2 bg-slate-700 px-4 py-2 rounded-lg">
-                <span class="text-slate-300 text-sm">Total Alumnos:</span>
-                <span id="totalStudents" class="text-xl font-bold text-white">0</span>
+            <div class="flex flex-wrap gap-3">
+                <div class="flex items-center gap-2 bg-slate-700 px-3 py-2 rounded-lg">
+                    <span class="text-slate-400 text-xs">Alumnos</span>
+                    <span id="totalStudents" class="text-lg font-bold text-white">0</span>
+                </div>
+                <div class="flex items-center gap-2 bg-slate-700 px-3 py-2 rounded-lg">
+                    <span class="text-slate-400 text-xs">Actividades</span>
+                    <span class="text-lg font-bold text-blue-400">11</span>
+                </div>
+                <div class="flex items-center gap-2 bg-green-900/40 border border-green-700/50 px-3 py-2 rounded-lg">
+                    <span class="text-green-300 text-xs">Mín. Aprob.</span>
+                    <span class="text-lg font-bold text-green-400">60</span>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-        
+    <main class="max-w-[1600px] mx-auto p-4 md:p-6 space-y-6">
+
         <!-- Stats Cards -->
-        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
-                <p class="text-slate-400 text-xs uppercase tracking-wider">Promedio General</p>
-                <p id="statAvg" class="text-3xl font-bold text-blue-400 mt-1">0</p>
+                <p class="text-slate-400 text-[10px] uppercase tracking-wider">Promedio Grupo (70%)</p>
+                <p id="statAvg" class="text-2xl font-bold text-blue-400 mt-1">0</p>
             </div>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
-                <p class="text-slate-400 text-xs uppercase tracking-wider">Aprobados (≥60)</p>
-                <p id="statPass" class="text-3xl font-bold text-green-400 mt-1">0</p>
+                <p class="text-slate-400 text-[10px] uppercase tracking-wider">Aprobados (≥60)</p>
+                <p id="statPass" class="text-2xl font-bold text-green-400 mt-1">0</p>
             </div>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
-                <p class="text-slate-400 text-xs uppercase tracking-wider">Calificación Más Alta</p>
-                <p id="statMax" class="text-3xl font-bold text-emerald-400 mt-1">0</p>
+                <p class="text-slate-400 text-[10px] uppercase tracking-wider">Reprobados (<60)</p>
+                <p id="statFail" class="text-2xl font-bold text-red-400 mt-1">0</p>
             </div>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
-                <p class="text-slate-400 text-xs uppercase tracking-wider">Total de Faltas</p>
-                <p id="statAbs" class="text-3xl font-bold text-red-400 mt-1">0</p>
+                <p class="text-slate-400 text-[10px] uppercase tracking-wider">Total Faltas</p>
+                <p id="statAbs" class="text-2xl font-bold text-orange-400 mt-1">0</p>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
+                <p class="text-slate-400 text-[10px] uppercase tracking-wider">Promedio Examen (30%)</p>
+                <p id="statExam" class="text-2xl font-bold text-purple-400 mt-1">0</p>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
+                <p class="text-slate-400 text-[10px] uppercase tracking-wider">% Aprobación</p>
+                <p id="statPercent" class="text-2xl font-bold text-emerald-400 mt-1">0%</p>
             </div>
         </section>
 
         <!-- Controls -->
-        <section class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md">
-            <h2 class="text-lg font-semibold mb-4 text-slate-200">Controles y Búsqueda</h2>
-            <div class="flex flex-col sm:flex-row gap-4">
-                <input type="text" id="searchInput" placeholder="🔍 Buscar alumno por nombre..." class="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <select id="sortSelect" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
+            <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+                <input type="text" id="searchInput" placeholder="🔍 Buscar alumno..." class="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="sortSelect" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="name-asc">Nombre (A-Z)</option>
                     <option value="name-desc">Nombre (Z-A)</option>
-                    <option value="avg-desc">Promedio (Mayor a Menor)</option>
-                    <option value="avg-asc">Promedio (Menor a Mayor)</option>
-                    <option value="abs-desc">Faltas (Mayor a Menor)</option>
+                    <option value="avg-desc">Promedio 70% (↓)</option>
+                    <option value="avg-asc">Promedio 70% (↑)</option>
+                    <option value="final-desc">Cal. Final (↓)</option>
+                    <option value="final-asc">Cal. Final (↑)</option>
+                    <option value="abs-desc">Faltas (↓)</option>
+                    <option value="exam-desc">Examen (↓)</option>
                 </select>
+                <select id="filterSelect" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all">Todos los alumnos</option>
+                    <option value="passing">✅ Aprobados (≥60)</option>
+                    <option value="failing">❌ Reprobados (<60)</option>
+                    <option value="absent">⚠️ Con faltas</option>
+                    <option value="zeros">🚨 Con actividades en 0</option>
+                    <option value="excellent">🌟 Excelentes (≥90)</option>
+                </select>
+                <button id="exportBtn" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">📋 Copiar Tabla</button>
             </div>
-            <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-slate-400">
-                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span> Excelente (≥65)</div>
-                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span> Regular (60-64)</div>
-                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span> Reprobado (<60)</div>
+            <div class="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-400">
+                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-red-500/40 border border-red-500"></span> Cero / No entregó</div>
+                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-yellow-500/30 border border-yellow-500"></span> Menor a 80</div>
+                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-green-500/30 border border-green-500"></span> 80-99</div>
+                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500/30 border border-emerald-500"></span> 100 (Perfecto)</div>
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="pass-badge px-2 py-0.5 rounded text-[10px]">≥60 Aprobado</span>
+                    <span class="fail-badge px-2 py-0.5 rounded text-[10px]"><60 Reprobado</span>
+                </div>
             </div>
         </section>
 
-        <!-- Data Table -->
+        <!-- Full Data Table -->
         <section class="bg-slate-800 rounded-xl border border-slate-700 shadow-md overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-300">
-                    <thead class="text-xs text-slate-400 uppercase bg-slate-700/50 sticky top-0">
+            <div class="table-container">
+                <table class="w-full text-xs text-left text-slate-300 border-collapse">
+                    <thead class="text-[10px] text-slate-400 uppercase bg-slate-700/80 sticky top-0 z-30">
                         <tr>
-                            <th class="px-6 py-3 whitespace-nowrap">Alumno</th>
-                            <th class="px-6 py-3 text-center">Promedio</th>
-                            <th class="px-6 py-3 text-center">Faltas</th>
-                            <th class="px-6 py-3 text-center">Estado</th>
+                            <th class="sticky-col bg-slate-700 px-2 py-3 font-semibold whitespace-nowrap border-b border-slate-600 min-w-[50px]">#</th>
+                            <th class="sticky-col-2 bg-slate-700 px-3 py-3 font-semibold whitespace-nowrap border-b border-slate-600 min-w-[200px]">Alumno</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Investigación: Anatomía de las etiquetas HTML (2-Sep)">Act 1</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Presentación estructura básica HTML (3-Sep)">Act 2</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Línea de tiempo HTML (3-Sep)">Act 3</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Infografía VS Code (4-Sep)">Act 4</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Reporte instalación VS Code (11-Sep)">Act 5</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Ejemplos HTML (17-Sep)">Act 6</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Etiquetas HTML en equipo (17-Sep)">Act 7</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Ejercicios con atributos HTML (24-Sep)">Act 8</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Código HTML de acuerdo a pantalla (26-Sep)">Act 9</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Cambia el código que ya tienes (3-Oct)">Act 10</th>
+                            <th class="px-2 py-3 text-center whitespace-nowrap border-b border-slate-600 min-w-[55px]" title="Proyecto Web">Act 11</th>
+                            <th class="px-3 py-3 text-center whitespace-nowrap border-b border-slate-600 bg-slate-600/50 min-w-[70px]">Prom 70%</th>
+                            <th class="px-3 py-3 text-center whitespace-nowrap border-b border-slate-600 bg-slate-600/50 min-w-[50px]">Faltas</th>
+                            <th class="px-3 py-3 text-center whitespace-nowrap border-b border-slate-600 bg-slate-600/50 min-w-[60px]">Examen</th>
+                            <th class="px-3 py-3 text-center whitespace-nowrap border-b border-slate-600 bg-slate-600/50 min-w-[70px]">Exam 30%</th>
+                            <th class="px-3 py-3 text-center whitespace-nowrap border-b border-slate-600 bg-slate-600/50 min-w-[70px]">Cal. Final</th>
+                            <th class="px-3 py-3 text-center whitespace-nowrap border-b border-slate-600 bg-slate-600/50 min-w-[80px]">Cal. Sistema</th>
+                            <th class="px-3 py-3 text-center whitespace-nowrap border-b border-slate-600 bg-slate-600/50 min-w-[90px]">Estado</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-700">
-                        <!-- Rows injected via JS -->
+                    <tbody id="tableBody" class="divide-y divide-slate-700/50">
                     </tbody>
                 </table>
             </div>
         </section>
+
+        <!-- Activity Summary -->
+        <section class="bg-slate-800 rounded-xl border border-slate-700 shadow-md p-5">
+            <h2 class="text-lg font-semibold mb-4 text-slate-200">📈 Resumen por Actividad</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="activitySummary">
+            </div>
+        </section>
+
+        <!-- Footer info -->
+        <footer class="text-center text-slate-500 text-xs py-4">
+            <p>Dashboard generado a partir del archivo "PROMEDIO PRIMER PARCIAL SOBRE 70% ACTIVIDADES"</p>
+            <p class="mt-1">Desarrolla Software con Herramientas | Calificación mínima aprobatoria: <span class="text-green-400 font-semibold">60</span></p>
+        </footer>
     </main>
 
     <script>
-        // --- DATA ---
+        // --- FULL DATA FROM EXCEL ---
         const students = [
-            { name: "ALVAREZ OLIVARRA ARIATHNA BETZABE", avg: 62, abs: 0 },
-            { name: "AMARILLAS ALMADA ALFREDO", avg: 69, abs: 0 },
-            { name: "ARGÜELLES APODACA EMILY YORLEI", avg: 62, abs: 0 },
-            { name: "ARZOLA SOTO EDUARDO ALBERTO", avg: 69, abs: 0 },
-            { name: "BENITEZ MEDINA ISMAEL", avg: 69, abs: 1 },
-            { name: "CORRAL CASTILLO KENNETH ALEXANDER", avg: 69, abs: 0 },
-            { name: "COTA NUÑEZ KEVIN", avg: 69, abs: 0 },
-            { name: "CUEVAS MARTINEZ MIGUEL ANTONIO", avg: 67, abs: 0 },
-            { name: "DOMINGUEZ FELIX MAURO DAMIAN", avg: 43, abs: 3 },
-            { name: "DOMINGUEZ LEYVA JUAN EDUARDO", avg: 69, abs: 0 },
-            { name: "DUARTE RIOS LUIS FRANCISCO", avg: 69, abs: 2 },
-            { name: "ELIOPULOS MONTAÑO JORGE EMILIANO", avg: 69, abs: 0 },
-            { name: "ESQUER VALENZUELA BRAYAN JESUS", avg: 68, abs: 0 },
-            { name: "GARATUZA HERNANDEZ EMILIANO", avg: 68, abs: 0 },
-            { name: "GARCIA CAMACHO MIGUEL ARMANDO", avg: 67, abs: 0 },
-            { name: "GARCIA ROJAS DANIELA", avg: 68, abs: 0 },
-            { name: "GASTELUM FRANCO DIEGO ALEJANDRO", avg: 56, abs: 2 },
-            { name: "GUTIÉRREZ CORONA JUAN LUIS", avg: 55, abs: 1 },
-            { name: "HERNANDEZ OLEA EMILIANO", avg: 61, abs: 1 },
-            { name: "HERRERA MORENO KRISTHIAN ABDIEL", avg: 67, abs: 1 },
-            { name: "JIMENEZ CAMPOA JUAN CARLOS", avg: 69, abs: 1 },
-            { name: "LARA LEYVA JOAN ERNESTO", avg: 69, abs: 0 },
-            { name: "MACHADO BELTRAN LILIA PAULINA", avg: 67, abs: 0 },
-            { name: "MEDRANO QUINTERO MARIA CRISTINA", avg: 54, abs: 1 },
-            { name: "MENESES MONTIJO ANYYA YARETHZI", avg: 69, abs: 1 },
-            { name: "MORENO VILLANUEVA FRANCISCO YAHIR", avg: 69, abs: 0 },
-            { name: "NUÑEZ BERNAL JUAN MANUEL", avg: 68, abs: 1 },
-            { name: "OCHOA GALVEZ DANIELL ALELY", avg: 69, abs: 0 },
-            { name: "OLIVA MARTINEZ AYLIN ALEXIA", avg: 67, abs: 2 },
-            { name: "PERAL JIMENEZ VALERIA GUADALUPE", avg: 54, abs: 0 },
-            { name: "PERAZA MARTINEZ REGINA VALERIA", avg: 69, abs: 0 },
-            { name: "QUESNEY ESPINOZA LESLIE", avg: 55, abs: 4 },
-            { name: "RABAGO SALINAS JESUS ROBERTO", avg: 55, abs: 1 },
-            { name: "RAMIREZ VAZQUEZ LUIS RUBEN", avg: 69, abs: 1 },
-            { name: "RIOS CAMPOS ORLANDO ADRIEL", avg: 67, abs: 1 },
-            { name: "SALAZAR CASTRO ANEL MICHELL", avg: 62, abs: 5 },
-            { name: "SAUCEDA BERNAL ANGEL URIEL", avg: 67, abs: 2 },
-            { name: "VALDEZ LUJAN DIANA MARIA", avg: 69, abs: 1 },
-            { name: "VALENZUELA DE LA VEGA JORGE ADRIAN", avg: 43, abs: 0 },
-            { name: "ZEPEDA ALVAREZ CARLOS ISAAC", avg: 45, abs: 2 }
+            { name: "ALVAREZ OLIVARRA ARIATHNA BETZABE", scores: [100,100,100,100,100,100,100,0,100,100,80], avg70: 62, abs: 0, exam: 40, exam30: 12, final: 74, finalSys: 70 },
+            { name: "AMARILLAS ALMADA ALFREDO", scores: [100,100,100,100,100,100,100,100,100,100,90], avg70: 69, abs: 0, exam: 80, exam30: 24, final: 93, finalSys: 90 },
+            { name: "ARGÜELLES APODACA EMILY YORLEI", scores: [0,100,100,100,100,90,100,100,100,100,80], avg70: 62, abs: 0, exam: 40, exam30: 12, final: 74, finalSys: 70 },
+            { name: "ARZOLA SOTO EDUARDO ALBERTO", scores: [100,90,100,100,100,100,100,100,100,100,90], avg70: 69, abs: 0, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "BENITEZ MEDINA ISMAEL", scores: [100,100,100,100,100,100,100,100,100,100,80], avg70: 69, abs: 1, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "CORRAL CASTILLO KENNETH ALEXANDER", scores: [100,100,100,100,100,100,100,100,100,100,90], avg70: 69, abs: 0, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "COTA NUÑEZ KEVIN", scores: [100,90,100,100,100,100,100,100,100,100,90], avg70: 69, abs: 0, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "CUEVAS MARTINEZ MIGUEL ANTONIO", scores: [100,80,100,100,100,100,100,90,100,100,80], avg70: 67, abs: 0, exam: 60, exam30: 18, final: 85, finalSys: 90 },
+            { name: "DOMINGUEZ FELIX MAURO DAMIAN", scores: [100,0,100,100,100,100,0,0,0,100,80], avg70: 43, abs: 3, exam: 35, exam30: 11, final: 54, finalSys: 50 },
+            { name: "DOMINGUEZ LEYVA JUAN EDUARDO", scores: [100,100,100,100,100,100,100,100,100,100,80], avg70: 69, abs: 0, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "DUARTE RIOS LUIS FRANCISCO", scores: [100,100,100,100,100,100,100,100,100,100,80], avg70: 69, abs: 2, exam: 60, exam30: 18, final: 87, finalSys: 90 },
+            { name: "ELIOPULOS MONTAÑO JORGE EMILIANO", scores: [100,100,100,100,100,100,100,100,100,100,90], avg70: 69, abs: 0, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "ESQUER VALENZUELA BRAYAN JESUS", scores: [100,85,100,100,100,100,100,100,100,100,90], avg70: 68, abs: 0, exam: 100, exam30: 30, final: 98, finalSys: 100 },
+            { name: "GARATUZA HERNANDEZ EMILIANO", scores: [100,80,100,100,100,100,100,100,100,100,90], avg70: 68, abs: 0, exam: 100, exam30: 30, final: 98, finalSys: 100 },
+            { name: "GARCIA CAMACHO MIGUEL ARMANDO", scores: [100,90,100,100,100,100,100,90,100,100,80], avg70: 67, abs: 0, exam: 100, exam30: 30, final: 97, finalSys: 100 },
+            { name: "GARCIA ROJAS DANIELA", scores: [100,80,100,100,100,100,100,100,100,100,90], avg70: 68, abs: 0, exam: 100, exam30: 30, final: 98, finalSys: 100 },
+            { name: "GASTELUM FRANCO DIEGO ALEJANDRO", scores: [100,0,100,100,100,100,100,0,100,100,80], avg70: 56, abs: 2, exam: 40, exam30: 12, final: 68, finalSys: 70 },
+            { name: "GUTIÉRREZ CORONA JUAN LUIS", scores: [0,80,0,100,100,100,100,100,100,100,80], avg70: 55, abs: 1, exam: 100, exam30: 30, final: 85, finalSys: 90 },
+            { name: "HERNANDEZ OLEA EMILIANO", scores: [0,95,100,100,100,100,100,90,100,100,80], avg70: 61, abs: 1, exam: 100, exam30: 30, final: 91, finalSys: 90 },
+            { name: "HERRERA MORENO KRISTHIAN ABDIEL", scores: [90,80,100,100,100,90,100,90,100,100,100], avg70: 67, abs: 1, exam: 100, exam30: 30, final: 97, finalSys: 100 },
+            { name: "JIMENEZ CAMPOA JUAN CARLOS", scores: [100,100,100,100,100,100,100,100,100,100,80], avg70: 69, abs: 1, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "LARA LEYVA JOAN ERNESTO", scores: [100,100,100,90,100,100,100,100,100,100,90], avg70: 69, abs: 0, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "MACHADO BELTRAN LILIA PAULINA", scores: [100,100,100,100,100,90,100,90,100,100,70], avg70: 67, abs: 0, exam: null, exam30: 0, final: 67, finalSys: 70 },
+            { name: "MEDRANO QUINTERO MARIA CRISTINA", scores: [0,80,100,100,100,0,100,90,100,100,80], avg70: 54, abs: 1, exam: 100, exam30: 30, final: 84, finalSys: 80 },
+            { name: "MENESES MONTIJO ANYYA YARETHZI", scores: [100,100,100,100,100,100,100,100,100,100,80], avg70: 69, abs: 1, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "MORENO VILLANUEVA FRANCISCO YAHIR", scores: [100,100,100,100,100,100,100,100,100,100,80], avg70: 69, abs: 0, exam: 90, exam30: 27, final: 96, finalSys: 100 },
+            { name: "NUÑEZ BERNAL JUAN MANUEL", scores: [100,100,100,100,100,100,100,90,100,100,80], avg70: 68, abs: 1, exam: 80, exam30: 24, final: 92, finalSys: 90 },
+            { name: "OCHOA GALVEZ DANIELL ALELY", scores: [100,100,100,100,100,100,100,100,100,100,90], avg70: 69, abs: 0, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "OLIVA MARTINEZ AYLIN ALEXIA", scores: [100,80,100,100,100,100,100,100,100,100,80], avg70: 67, abs: 2, exam: 40, exam30: 12, final: 79, finalSys: 80 },
+            { name: "PERAL JIMENEZ VALERIA GUADALUPE", scores: [100,70,100,100,0,100,100,0,100,100,80], avg70: 54, abs: 0, exam: 30, exam30: 9, final: 63, finalSys: 60 },
+            { name: "PERAZA MARTINEZ REGINA VALERIA", scores: [100,100,100,100,100,90,100,100,100,100,90], avg70: 69, abs: 0, exam: 45, exam30: 14, final: 82, finalSys: 80 },
+            { name: "QUESNEY ESPINOZA LESLIE", scores: [100,100,100,100,0,0,100,100,100,100,70], avg70: 55, abs: 4, exam: 35, exam30: 11, final: 66, finalSys: 70 },
+            { name: "RABAGO SALINAS JESUS ROBERTO", scores: [0,0,100,100,100,100,100,90,100,100,80], avg70: 55, abs: 1, exam: 75, exam30: 23, final: 78, finalSys: 80 },
+            { name: "RAMIREZ VAZQUEZ LUIS RUBEN", scores: [100,100,100,100,100,100,100,100,100,100,90], avg70: 69, abs: 1, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "RIOS CAMPOS ORLANDO ADRIEL", scores: [100,100,100,100,100,90,100,100,100,100,70], avg70: 67, abs: 1, exam: 100, exam30: 30, final: 97, finalSys: 100 },
+            { name: "SALAZAR CASTRO ANEL MICHELL", scores: [100,100,100,100,100,100,100,100,0,100,80], avg70: 62, abs: 5, exam: 100, exam30: 30, final: 92, finalSys: 90 },
+            { name: "SAUCEDA BERNAL ANGEL URIEL", scores: [100,100,100,100,100,90,100,90,100,100,80], avg70: 67, abs: 2, exam: 100, exam30: 30, final: 97, finalSys: 100 },
+            { name: "VALDEZ LUJAN DIANA MARIA", scores: [100,80,100,100,100,100,100,100,100,100,100], avg70: 69, abs: 1, exam: 100, exam30: 30, final: 99, finalSys: 100 },
+            { name: "VALENZUELA DE LA VEGA JORGE ADRIAN", scores: [100,0,0,0,0,100,100,90,100,100,80], avg70: 43, abs: 0, exam: 100, exam30: 30, final: 73, finalSys: 70 },
+            { name: "ZEPEDA ALVAREZ CARLOS ISAAC", scores: [100,80,0,90,100,50,100,0,0,100,90], avg70: 45, abs: 2, exam: 35, exam30: 11, final: 56, finalSys: 50 }
         ];
 
-        // --- STATS CALCULATION ---
-        const totalStudents = students.length;
-        const classAvg = (students.reduce((a, b) => a + b.avg, 0) / totalStudents).toFixed(1);
-        const passingStudents = students.filter(s => s.avg >= 60).length;
-        const maxAvg = Math.max(...students.map(s => s.avg));
+        const activityNames = [
+            "Investigación: Anatomía de las etiquetas HTML",
+            "Presentación estructura básica HTML",
+            "Línea de tiempo HTML",
+            "Infografía VS Code",
+            "Reporte instalación VS Code",
+            "Ejemplos HTML",
+            "Etiquetas HTML (equipo)",
+            "Ejercicios con atributos HTML",
+            "Código HTML de acuerdo a pantalla",
+            "Cambia el código que ya tienes",
+            "Proyecto Web"
+        ];
+
+        const PASS_THRESHOLD = 60; // Calificación aprobatoria
+
+        // --- STATS ---
+        const total = students.length;
+        const classAvg = (students.reduce((a, b) => a + b.avg70, 0) / total).toFixed(1);
+        const passing = students.filter(s => s.finalSys >= PASS_THRESHOLD).length;
+        const failing = total - passing;
         const totalAbs = students.reduce((a, b) => a + b.abs, 0);
+        const examStudents = students.filter(s => s.exam !== null);
+        const avgExam = (examStudents.reduce((a, b) => a + b.exam, 0) / examStudents.length).toFixed(1);
+        const passPercent = ((passing / total) * 100).toFixed(1);
 
-        document.getElementById('totalStudents').innerText = totalStudents;
+        document.getElementById('totalStudents').innerText = total;
         document.getElementById('statAvg').innerText = classAvg;
-        document.getElementById('statPass').innerText = `${passingStudents}/${totalStudents}`;
-        document.getElementById('statMax').innerText = maxAvg;
+        document.getElementById('statPass').innerText = `${passing}/${total}`;
+        document.getElementById('statFail').innerText = `${failing}/${total}`;
         document.getElementById('statAbs').innerText = totalAbs;
+        document.getElementById('statExam').innerText = avgExam;
+        document.getElementById('statPercent').innerText = `${passPercent}%`;
 
-        // --- TABLE RENDERING ---
+        // --- ACTIVITY SUMMARY ---
+        function renderActivitySummary() {
+            const container = document.getElementById('activitySummary');
+            container.innerHTML = '';
+            activityNames.forEach((actName, idx) => {
+                const scores = students.map(s => s.scores[idx]);
+                const avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+                const zeros = scores.filter(s => s === 0).length;
+                const perfect = scores.filter(s => s === 100).length;
+                const low = scores.filter(s => s < 80 && s > 0).length;
+
+                const barWidth = avg;
+                let barColor = 'bg-emerald-500';
+                if (avg < 60) barColor = 'bg-red-500';
+                else if (avg < 80) barColor = 'bg-yellow-500';
+                else if (avg < 95) barColor = 'bg-green-500';
+
+                container.innerHTML += `
+                    <div class="bg-slate-700/50 rounded-lg p-3 border border-slate-600/50">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[11px] text-slate-300 font-medium leading-tight flex-1 mr-2">Act ${idx + 1}: ${actName}</span>
+                            <span class="text-sm font-bold text-white">${avg}</span>
+                        </div>
+                        <div class="w-full bg-slate-600 rounded-full h-2 mb-2">
+                            <div class="${barColor} h-2 rounded-full transition-all" style="width: ${barWidth}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>✅ 100: ${perfect}</span>
+                            <span>⚠️ <80: ${low}</span>
+                            <span>❌ 0: ${zeros}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        renderActivitySummary();
+
+        // --- TABLE ---
         const tableBody = document.getElementById('tableBody');
         const searchInput = document.getElementById('searchInput');
         const sortSelect = document.getElementById('sortSelect');
+        const filterSelect = document.getElementById('filterSelect');
 
-        function getStatus(avg) {
-            if (avg >= 65) return { text: 'Excelente', color: 'bg-green-500/20 text-green-400 border-green-500/50' };
-            if (avg >= 60) return { text: 'Aprobado', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' };
-            return { text: 'Reprobado', color: 'bg-red-500/20 text-red-400 border-red-500/50' };
+        function getScoreClass(score) {
+            if (score === 0) return 'cell-zero';
+            if (score < 80) return 'cell-low';
+            if (score === 100) return 'cell-perfect';
+            return '';
+        }
+
+        function getStatusInfo(finalSys) {
+            if (finalSys >= 90) return { text: '🌟 Excelente', cls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50' };
+            if (finalSys >= 80) return { text: '✓ Muy Bien', cls: 'bg-green-500/20 text-green-400 border-green-500/50' };
+            if (finalSys >= PASS_THRESHOLD) return { text: '✓ Aprobado', cls: 'bg-blue-500/20 text-blue-400 border-blue-500/50' };
+            return { text: '✗ Reprobado', cls: 'bg-red-500/20 text-red-400 border-red-500/50' };
+        }
+
+        function getFinalClass(val) {
+            if (val >= 90) return 'text-emerald-400 font-bold';
+            if (val >= 80) return 'text-green-400';
+            if (val >= PASS_THRESHOLD) return 'text-blue-400';
+            return 'text-red-400 font-bold';
         }
 
         function renderTable(data) {
             tableBody.innerHTML = '';
-            data.forEach((s) => {
-                const status = getStatus(s.avg);
+            data.forEach((s, idx) => {
+                const status = getStatusInfo(s.finalSys);
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-slate-700/50 transition-colors';
-                
+                row.className = 'row-hover transition-colors';
+
+                let scoresHTML = '';
+                s.scores.forEach(sc => {
+                    const cls = getScoreClass(sc);
+                    scoresHTML += `<td class="px-2 py-2 text-center font-mono ${cls}">${sc}</td>`;
+                });
+
+                const absDisplay = s.abs > 0 ? `<span class="text-red-400 font-bold">${s.abs}</span>` : `<span class="text-slate-600">0</span>`;
+                const examDisplay = s.exam !== null ? s.exam : `<span class="text-slate-600">—</span>`;
+                const displayName = s.name.length > 32 ? s.name.substring(0, 32) + '…' : s.name;
+
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white whitespace-nowrap">${s.name}</td>
-                    <td class="px-6 py-4 text-center font-bold ${s.avg < 60 ? 'text-red-400' : 'text-white'}">${s.avg}</td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="${s.abs > 0 ? 'text-red-400 font-bold' : 'text-slate-500'}">${s.abs}</span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="px-2 py-1 rounded-full text-xs border ${status.color}">${status.text}</span>
+                    <td class="sticky-col bg-slate-800 px-2 py-2 font-mono text-slate-500 text-[11px] border-r border-slate-700 text-center">${idx + 1}</td>
+                    <td class="sticky-col-2 bg-slate-800 px-3 py-2 font-medium text-white whitespace-nowrap border-r border-slate-700 text-[11px]" title="${s.name}">${displayName}</td>
+                    ${scoresHTML}
+                    <td class="px-3 py-2 text-center font-bold ${s.avg70 < 50 ? 'text-red-400' : s.avg70 < 60 ? 'text-yellow-400' : 'text-blue-400'}">${s.avg70}</td>
+                    <td class="px-3 py-2 text-center">${absDisplay}</td>
+                    <td class="px-3 py-2 text-center font-mono ${s.exam !== null ? (s.exam < 60 ? 'text-red-400' : 'text-purple-400') : 'text-slate-600'}">${examDisplay}</td>
+                    <td class="px-3 py-2 text-center font-mono text-purple-300">${s.exam30}</td>
+                    <td class="px-3 py-2 text-center font-bold ${getFinalClass(s.final)}">${s.final}</td>
+                    <td class="px-3 py-2 text-center font-bold text-lg ${getFinalClass(s.finalSys)}">${s.finalSys}</td>
+                    <td class="px-3 py-2 text-center">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] border ${status.cls} whitespace-nowrap">${status.text}</span>
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -180,30 +345,64 @@
         }
 
         function filterAndSort() {
-            const searchTerm = searchInput.value.toLowerCase();
+            const search = searchInput.value.toLowerCase();
             const sortVal = sortSelect.value;
-            
-            let filtered = students.filter(s => s.name.toLowerCase().includes(searchTerm));
-            
+            const filterVal = filterSelect.value;
+
+            let filtered = students.filter(s => {
+                if (!s.name.toLowerCase().includes(search)) return false;
+                if (filterVal === 'passing' && s.finalSys < PASS_THRESHOLD) return false;
+                if (filterVal === 'failing' && s.finalSys >= PASS_THRESHOLD) return false;
+                if (filterVal === 'absent' && s.abs === 0) return false;
+                if (filterVal === 'zeros' && !s.scores.some(sc => sc === 0)) return false;
+                if (filterVal === 'excellent' && s.finalSys < 90) return false;
+                return true;
+            });
+
             filtered.sort((a, b) => {
-                switch(sortVal) {
+                switch (sortVal) {
                     case 'name-asc': return a.name.localeCompare(b.name);
                     case 'name-desc': return b.name.localeCompare(a.name);
-                    case 'avg-desc': return b.avg - a.avg;
-                    case 'avg-asc': return a.avg - b.avg;
+                    case 'avg-desc': return b.avg70 - a.avg70;
+                    case 'avg-asc': return a.avg70 - b.avg70;
+                    case 'final-desc': return b.finalSys - a.finalSys;
+                    case 'final-asc': return a.finalSys - b.finalSys;
                     case 'abs-desc': return b.abs - a.abs;
+                    case 'exam-desc': return (b.exam || 0) - (a.exam || 0);
                     default: return 0;
                 }
             });
-            
+
             renderTable(filtered);
         }
 
         searchInput.addEventListener('input', filterAndSort);
         sortSelect.addEventListener('change', filterAndSort);
-        
+        filterSelect.addEventListener('change', filterAndSort);
+
+        // Export / Copy
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            let text = "Alumno\tAct1\tAct2\tAct3\tAct4\tAct5\tAct6\tAct7\tAct8\tAct9\tAct10\tAct11\tProm70%\tFaltas\tExamen\tExam30%\tCalFinal\tCalSistema\tEstado\n";
+            students.forEach(s => {
+                const estado = s.finalSys >= PASS_THRESHOLD ? 'Aprobado' : 'Reprobado';
+                text += `${s.name}\t${s.scores.join('\t')}\t${s.avg70}\t${s.abs}\t${s.exam ?? 'N/A'}\t${s.exam30}\t${s.final}\t${s.finalSys}\t${estado}\n`;
+            });
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('exportBtn');
+                btn.innerText = '✅ Copiado!';
+                btn.classList.remove('bg-blue-600');
+                btn.classList.add('bg-green-600');
+                setTimeout(() => {
+                    btn.innerText = '📋 Copiar Tabla';
+                    btn.classList.remove('bg-green-600');
+                    btn.classList.add('bg-blue-600');
+                }, 2000);
+            });
+        });
+
         // Initial render
         filterAndSort();
     </script>
 </body>
 </html>
+```
